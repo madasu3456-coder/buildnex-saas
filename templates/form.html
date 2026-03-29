@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Recommendation Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            padding: 0;
+            color: #1e293b;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        p {
+            color: #475569;
+            margin-bottom: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            opacity: 0.95;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Property Recommendation Form</h1>
+            <p>Fill in your details to get the best matching property suggestions.</p>
+
+            <form method="POST" action="/submit">
+                <div class="form-grid">
+                    <div>
+                        <label for="name">Name</label>
+                        <input type="text" name="name" id="name" required>
+                    </div>
+
+                    <div>
+                        <label for="phone">Phone</label>
+                        <input type="text" name="phone" id="phone" required>
+                    </div>
+
+                    <div class="full-width">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email">
+                    </div>
+
+                    <div>
+                        <label for="budget_min">Budget Min</label>
+                        <input type="text" name="budget_min" id="budget_min">
+                    </div>
+
+                    <div>
+                        <label for="budget_max">Budget Max</label>
+                        <input type="text" name="budget_max" id="budget_max">
+                    </div>
+
+                    <div>
+                        <label for="purpose">Purpose</label>
+                        <select name="purpose" id="purpose">
+                            <option value="self">Self-use</option>
+                            <option value="investment">Investment</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="top_area">Top Area</label>
+                        <input type="text" name="top_area" id="top_area">
+                    </div>
+
+                    <div>
+                        <label for="priority">Lead Priority</label>
+                        <select name="priority" id="priority">
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="segment">Builder Segment</label>
+                        <select name="segment" id="segment">
+                            <option value="premium">Premium</option>
+                            <option value="mid">Mid</option>
+                            <option value="value">Value</option>
+                            <option value="luxury">Luxury</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="paint">Paint Opportunity</label>
+                        <input type="text" name="paint" id="paint">
+                    </div>
+
+                    <div>
+                        <label for="green">Green Fit</label>
+                        <input type="text" name="green" id="green">
+                    </div>
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
