@@ -164,6 +164,10 @@
             background: #fff;
         }
 
+        .inline-form {
+            display: inline;
+        }
+
         .action-btn {
             display: inline-block;
             padding: 8px 12px;
@@ -173,6 +177,8 @@
             font-weight: bold;
             margin-right: 8px;
             margin-bottom: 6px;
+            border: none;
+            cursor: pointer;
         }
 
         .whatsapp-btn {
@@ -352,11 +358,10 @@
                                 </td>
 
                                 <td>
-                                    <a class="action-btn whatsapp-btn"
-                                       href="https://wa.me/91{{ lead['phone'] | replace(' ', '') }}?text=Hi%20{{ lead['name'] | replace(' ', '%20') }},%0A%0AThanks%20for%20your%20interest%20in%20Buildnex%20Core%20LLP.%0A%0ABudget:%20%E2%82%B9{{ lead['budget_min'] }}%20-%20%E2%82%B9{{ lead['budget_max'] }}%0APurpose:%20{{ 'Self-use' if lead['purpose'] == 'self' else 'Investment' }}%0ATop%20Area:%20{{ lead['top_area'] | replace(' ', '%20') }}%0ALead%20Score:%20{{ lead['lead_score_category'] }}%0A%0ABased%20on%20your%20requirement,%20I%20can%20share%20the%20best%20matching%20options%20and%20next%20steps.%0A%0AReply%20here%20and%20I%E2%80%99ll%20guide%20you."
-                                       target="_blank">
-                                       WhatsApp
-                                    </a>
+                                    <form method="POST" action="/admin/leads/{{ lead['id'] }}/send-whatsapp" class="inline-form">
+                                        <button type="submit" class="action-btn whatsapp-btn">Send WhatsApp</button>
+                                    </form>
+
                                     {% if lead["email"] %}
                                     <a class="action-btn email-btn"
                                        href="mailto:{{ lead['email'] }}">

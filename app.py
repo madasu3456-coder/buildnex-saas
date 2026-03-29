@@ -391,3 +391,51 @@ def send_whatsapp(lead_id):
 
     except Exception as e:
         return {"error": str(e)}, 500
+@app.route("/admin/leads/<int:lead_id>/send-whatsapp", methods=["POST"])
+def send_whatsapp(lead_id):
+    from datetime import datetime
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                # Get lead
+                cur.execute("""
+                    SELECT name, phone, lead_score_category
+                    FROM leads
+                    WHERE id = %s
+                """, (lead_id,))
+                lead = cur.fetchone()
+
+                if not lead:
+                    return {"error": "Lead not found"}, 404
+
+                name, phone, category = lead
+
+                # Simulated message logic
+                if category == "HOT":
+                    message = f"HOT LEAD → {name}: High intent. Send priority options."
+                    stage = "initial_hot"
+                elif category == "WARM":
+                    message = f"WARM LEAD → {name}: Send curated options."
+                    stage = "initial_warm"
+                else:
+                    message = f"COLD LEAD → {name}: Soft follow-up."
+                    stage = "initial_cold"
+
+                # Update lead follow-up tracking
+                cur.execute("""
+                    UPDATE leads
+                    SET last_whatsapp_sent_at = %s,
+                        followup_stage = %s,
+                        followup_status = 'sent'
+                    WHERE id = %s
+                """, (datetime.now(), stage, lead_id))
+
+                conn.commit()
+
+        print(f"[SIMULATED WHATSAPP] {message}")
+
+        return {"status": "simulated_sent", "message": message}
+
+    except Exception as e:
+        return {"error": str(e)}, 500
