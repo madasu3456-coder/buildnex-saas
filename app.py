@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, url_for, flash
 import os
 import psycopg
 from psycopg.rows import dict_row
@@ -9,6 +9,15 @@ app.secret_key = os.environ.get("SECRET_KEY", "buildnex-secret-key")
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "buildnex123")
 DATABASE_URL = os.environ.get("DATABASE_URL")
+
+ALLOWED_STATUSES = [
+    "New",
+    "Contacted",
+    "Qualified",
+    "Site Visit Scheduled",
+    "Closed",
+    "Lost",
+]
 
 
 def get_db():
@@ -34,9 +43,17 @@ def init_db():
                     builder_segment TEXT,
                     paint TEXT,
                     green TEXT,
+                    status TEXT DEFAULT 'New',
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
+
+            # Safe upgrade for existing tables that do not yet have status column
+            cur.execute("""
+                ALTER TABLE leads
+                ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'New'
+            """)
+
         conn.commit()
 
 
@@ -53,8 +70,21 @@ def submit():
         with conn.cursor() as cur:
             cur.execute("""
                 INSERT INTO leads
-                (name, phone, email, budget_min, budget_max, purpose, top_area, lead_priority, builder_segment, paint, green)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                (
+                    name,
+                    phone,
+                    email,
+                    budget_min,
+                    budget_max,
+                    purpose,
+                    top_area,
+                    lead_priority,
+                    builder_segment,
+                    paint,
+                    green,
+                    status
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 data.get("name"),
                 data.get("phone"),
@@ -66,7 +96,8 @@ def submit():
                 data.get("priority"),
                 data.get("segment"),
                 data.get("paint"),
-                data.get("green")
+                data.get("green"),
+                "New"
             ))
         conn.commit()
 
@@ -96,6 +127,29 @@ def logout():
     return redirect("/login")
 
 
+@app.route("/admin/leads/<int:lead_id>/status", methods=["POST"])
+def update_lead_status(lead_id):
+    if not session.get("admin_logged_in"):
+        return redirect("/login")
+
+    new_status = request.form.get("status", "").strip()
+
+    if new_status not in ALLOWED_STATUSES:
+        flash("Invalid status selected.", "error")
+        return redirect(url_for("dashboard"))
+
+    with get_db() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE leads SET status = %s WHERE id = %s",
+                (new_status, lead_id)
+            )
+        conn.commit()
+
+    flash("Lead status updated successfully.", "success")
+    return redirect(url_for("dashboard"))
+
+
 @app.route("/admin/dashboard")
 def dashboard():
     if not session.get("admin_logged_in"):
@@ -104,10 +158,24 @@ def dashboard():
     purpose = request.args.get("purpose")
     priority = request.args.get("priority")
     segment = request.args.get("segment")
+    status = request.args.get("status")
 
     query = """
-        SELECT id, name, phone, email, budget_min, budget_max, purpose,
-               top_area, lead_priority, builder_segment, paint, green, created_at
+        SELECT
+            id,
+            name,
+            phone,
+            email,
+            budget_min,
+            budget_max,
+            purpose,
+            top_area,
+            lead_priority,
+            builder_segment,
+            paint,
+            green,
+            status,
+            created_at
         FROM leads
         WHERE 1=1
     """
@@ -125,6 +193,10 @@ def dashboard():
         query += " AND builder_segment = %s"
         params.append(segment)
 
+    if status:
+        query += " AND status = %s"
+        params.append(status)
+
     query += " ORDER BY id DESC"
 
     with get_db() as conn:
@@ -137,7 +209,9 @@ def dashboard():
         leads=leads,
         purpose_filter=purpose,
         priority_filter=priority,
-        segment_filter=segment
+        segment_filter=segment,
+        status_filter=status,
+        allowed_statuses=ALLOWED_STATUSES
     )
 
 
