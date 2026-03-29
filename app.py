@@ -4,9 +4,12 @@ import sqlite3
 app = Flask(__name__)
 app.secret_key = "buildnex-secret-key"
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "buildnex123"
+import os
 
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "buildnex123")
+
+app.secret_key = os.environ.get("SECRET_KEY", "buildnex-secret-key")
 def get_db():
     conn = sqlite3.connect("database.db")
     conn.row_factory = sqlite3.Row
