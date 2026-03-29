@@ -19,11 +19,82 @@ ALLOWED_STATUSES = [
     "Lost",
 ]
 
+ALLOWED_SCORE_CATEGORIES = [
+    "HOT",
+    "WARM",
+    "COLD",
+]
+
 
 def get_db():
     if not DATABASE_URL:
         raise RuntimeError("DATABASE_URL is not set")
     return psycopg.connect(DATABASE_URL)
+
+
+def calculate_lead_score(budget_min, budget_max, purpose, lead_priority, paint, green):
+    score = 0
+
+    try:
+        min_budget = int(str(budget_min).strip()) if budget_min else 0
+    except (ValueError, TypeError):
+        min_budget = 0
+
+    try:
+        max_budget = int(str(budget_max).strip()) if budget_max else 0
+    except (ValueError, TypeError):
+        max_budget = 0
+
+    purpose = (purpose or "").strip().lower()
+    lead_priority = (lead_priority or "").strip().lower()
+    paint = (paint or "").strip().lower()
+    green = (green or "").strip().lower()
+
+    # Budget scoring
+    if max_budget >= 10000:
+        score += 3
+    elif max_budget >= 7000:
+        score += 2
+    else:
+        score += 1
+
+    # Purpose scoring
+    if purpose in ["self", "self-use", "self use"]:
+        score += 3
+    elif purpose == "investment":
+        score += 2
+    else:
+        score += 1
+
+    # Priority scoring
+    if lead_priority == "high":
+        score += 3
+    elif lead_priority == "medium":
+        score += 2
+    else:
+        score += 1
+
+    # Paint interest scoring
+    if paint == "high":
+        score += 2
+    elif paint == "medium":
+        score += 1
+
+    # Green interest scoring
+    if green == "high":
+        score += 2
+    elif green == "medium":
+        score += 1
+
+    # Final category
+    if score >= 10:
+        category = "HOT"
+    elif score >= 7:
+        category = "WARM"
+    else:
+        category = "COLD"
+
+    return score, category
 
 
 def init_db():
@@ -40,6 +111,8 @@ def init_db():
                     purpose TEXT,
                     top_area TEXT,
                     lead_priority TEXT,
+                    lead_score INTEGER DEFAULT 0,
+                    lead_score_category VARCHAR(20) DEFAULT 'COLD',
                     builder_segment TEXT,
                     paint TEXT,
                     green TEXT,
@@ -48,10 +121,20 @@ def init_db():
                 )
             """)
 
-            # Safe upgrade for existing tables that do not yet have status column
+            # Safe upgrades for existing tables
             cur.execute("""
                 ALTER TABLE leads
                 ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'New'
+            """)
+
+            cur.execute("""
+                ALTER TABLE leads
+                ADD COLUMN IF NOT EXISTS lead_score INTEGER DEFAULT 0
+            """)
+
+            cur.execute("""
+                ALTER TABLE leads
+                ADD COLUMN IF NOT EXISTS lead_score_category VARCHAR(20) DEFAULT 'COLD'
             """)
 
         conn.commit()
@@ -66,6 +149,27 @@ def form():
 def submit():
     data = request.form
 
+    name = data.get("name")
+    phone = data.get("phone")
+    email = data.get("email")
+    budget_min = data.get("budget_min")
+    budget_max = data.get("budget_max")
+    purpose = data.get("purpose")
+    top_area = data.get("top_area")
+    lead_priority = data.get("priority")
+    builder_segment = data.get("segment")
+    paint = data.get("paint")
+    green = data.get("green")
+
+    lead_score, lead_score_category = calculate_lead_score(
+        budget_min,
+        budget_max,
+        purpose,
+        lead_priority,
+        paint,
+        green
+    )
+
     with get_db() as conn:
         with conn.cursor() as cur:
             cur.execute("""
@@ -79,24 +183,28 @@ def submit():
                     purpose,
                     top_area,
                     lead_priority,
+                    lead_score,
+                    lead_score_category,
                     builder_segment,
                     paint,
                     green,
                     status
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
-                data.get("name"),
-                data.get("phone"),
-                data.get("email"),
-                data.get("budget_min"),
-                data.get("budget_max"),
-                data.get("purpose"),
-                data.get("top_area"),
-                data.get("priority"),
-                data.get("segment"),
-                data.get("paint"),
-                data.get("green"),
+                name,
+                phone,
+                email,
+                budget_min,
+                budget_max,
+                purpose,
+                top_area,
+                lead_priority,
+                lead_score,
+                lead_score_category,
+                builder_segment,
+                paint,
+                green,
                 "New"
             ))
         conn.commit()
@@ -159,6 +267,7 @@ def dashboard():
     priority = request.args.get("priority")
     segment = request.args.get("segment")
     status = request.args.get("status")
+    score_category = request.args.get("score_category")
 
     query = """
         SELECT
@@ -171,6 +280,8 @@ def dashboard():
             purpose,
             top_area,
             lead_priority,
+            lead_score,
+            lead_score_category,
             builder_segment,
             paint,
             green,
@@ -197,6 +308,10 @@ def dashboard():
         query += " AND status = %s"
         params.append(status)
 
+    if score_category:
+        query += " AND lead_score_category = %s"
+        params.append(score_category)
+
     query += " ORDER BY id DESC"
 
     with get_db() as conn:
@@ -211,7 +326,9 @@ def dashboard():
         priority_filter=priority,
         segment_filter=segment,
         status_filter=status,
-        allowed_statuses=ALLOWED_STATUSES
+        score_category_filter=score_category,
+        allowed_statuses=ALLOWED_STATUSES,
+        allowed_score_categories=ALLOWED_SCORE_CATEGORIES
     )
 
 
