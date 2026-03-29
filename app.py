@@ -336,3 +336,58 @@ init_db()
 
 if __name__ == "__main__":
     app.run(debug=True)
+@app.route("/admin/leads/<int:lead_id>/send-whatsapp", methods=["POST"])
+def send_whatsapp(lead_id):
+    import requests
+    import os
+    from datetime import datetime
+
+    access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+
+    if not access_token or not phone_number_id:
+        return {"error": "WhatsApp config missing"}, 500
+
+    try:
+        with get_db_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT name, phone, lead_score_category
+                    FROM leads
+                    WHERE id = %s
+                """, (lead_id,))
+                lead = cur.fetchone()
+
+        if not lead:
+            return {"error": "Lead not found"}, 404
+
+        name, phone, category = lead
+
+        # Score-based message
+        if category == "HOT":
+            message = f"Hi {name}, based on your requirement we have high-potential options ready. Want me to share top deals or schedule a call?"
+        elif category == "WARM":
+            message = f"Hi {name}, I can share matching options based on your budget and area. Want me to send details?"
+        else:
+            message = f"Hi {name}, whenever you're ready I can help you with suitable options. Just reply here."
+
+        url = f"https://graph.facebook.com/v18.0/{phone_number_id}/messages"
+
+        payload = {
+            "messaging_product": "whatsapp",
+            "to": f"91{phone}",
+            "type": "text",
+            "text": {"body": message}
+        }
+
+        headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        return {"status": "sent", "response": response.json()}
+
+    except Exception as e:
+        return {"error": str(e)}, 500
