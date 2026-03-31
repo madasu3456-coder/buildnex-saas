@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Follow-ups</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f7f7f7;
+        }
+
+        h2 {
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        a.button-link,
+        button {
+            background: #0d6efd;
+            color: white;
+            padding: 6px 10px;
+            text-decoration: none;
+            border-radius: 6px;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .empty-message {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .action-form {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 180px;
+        }
+
+        .action-form select,
+        .action-form input,
+        .action-form button {
+            padding: 6px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Today's Follow-ups</h2>
+
+    {% if leads %}
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Top Area</th>
+                <th>Next Follow-up</th>
+                <th>Follow-up</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr>
+                <td>{{ lead.name }}</td>
+                <td>{{ lead.phone }}</td>
+                <td>{{ lead.top_area }}</td>
+                <td>{{ lead.next_followup or '-' }}</td>
+                <td>
+                    <a class="button-link" href="{{ url_for('followup_redirect', lead_id=lead.id) }}" target="_blank">
+                        Send Follow-up
+                    </a>
+                </td>
+                <td>
+                    <form class="action-form" method="POST" action="{{ url_for('update_lead_status', lead_id=lead.id) }}">
+                        <select name="status" required>
+                            <option value="Follow-up" {% if lead.status == 'Follow-up' %}selected{% endif %}>Follow-up</option>
+                            <option value="Qualified" {% if lead.status == 'Qualified' %}selected{% endif %}>Qualified</option>
+                            <option value="Site Visit Scheduled" {% if lead.status == 'Site Visit Scheduled' %}selected{% endif %}>Site Visit Scheduled</option>
+                            <option value="Closed" {% if lead.status == 'Closed' %}selected{% endif %}>Closed</option>
+                        </select>
+
+                        <input type="date" name="next_followup" value="{{ lead.next_followup or '' }}">
+                        <input type="text" name="notes" placeholder="Update note">
+                        <button type="submit">Save</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-message">
+        No follow-ups scheduled for today.
+    </div>
+    {% endif %}
+</body>
+</html>

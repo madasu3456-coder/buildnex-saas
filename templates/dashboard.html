@@ -3,380 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buildnex Core LLP - Admin Dashboard</title>
+    <title>Admin Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f5f7fb;
-            margin: 0;
-            padding: 0;
-            color: #1e293b;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 14px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-
-        .brand {
-            font-size: 14px;
-            font-weight: bold;
-            color: #2563eb;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
+            margin: 20px;
+            background: #f7f7f7;
         }
 
         h1 {
-            margin-top: 0;
             margin-bottom: 8px;
-            font-size: 30px;
         }
 
-        p {
-            color: #475569;
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
-        .top-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none;
-            color: #2563eb;
-            font-weight: bold;
+        .top-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
-        .top-link:hover {
-            text-decoration: underline;
+        .summary-bar {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
         }
 
         .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-
-        .filters label {
-            display: block;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
-
-        .filters select, .filters button {
-            width: 100%;
-            padding: 10px;
+            background: white;
+            padding: 12px;
             border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            box-sizing: border-box;
+            margin-bottom: 16px;
         }
 
-        .filters button {
-            background: #0f172a;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 24px;
+        .filters form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .flash {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .flash.success {
+            background: #e6ffed;
+            color: #0f5132;
+        }
+
+        .flash.error {
+            background: #ffe6e6;
+            color: #842029;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             background: white;
         }
 
         th, td {
-            text-align: left;
-            padding: 14px;
-            border-bottom: 1px solid #e2e8f0;
+            border: 1px solid #ddd;
+            padding: 8px;
             vertical-align: top;
+            font-size: 14px;
         }
 
         th {
-            background: #f8fafc;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            color: #334155;
+            background: #f0f0f0;
         }
 
-        tr:hover {
-            background: #f8fafc;
+        .action-form {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 180px;
         }
 
-        .empty {
-            padding: 18px;
-            border-radius: 10px;
-            background: #eff6ff;
-            color: #1d4ed8;
-            margin-top: 20px;
+        .action-form select,
+        .action-form input,
+        .action-form button {
+            padding: 6px;
+            font-size: 13px;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 6px 10px;
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
             border-radius: 999px;
+            background: #eee;
+            display: inline-block;
             font-size: 12px;
-            font-weight: bold;
-            background: #e2e8f0;
-            color: #0f172a;
         }
 
         .score-badge {
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
             display: inline-block;
-            padding: 6px 10px;
-            border-radius: 999px;
             font-size: 12px;
             font-weight: bold;
         }
 
         .score-hot {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #dc3545;
         }
 
         .score-warm {
-            background: #ffedd5;
-            color: #9a3412;
+            background: #fd7e14;
         }
 
         .score-cold {
-            background: #dbeafe;
-            color: #1d4ed8;
+            background: #0d6efd;
         }
 
-        .status-form select {
-            min-width: 170px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            background: #fff;
-        }
-
-        .inline-form {
-            display: inline;
-        }
-
-        .action-btn {
-            display: inline-block;
-            padding: 8px 12px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            margin-right: 8px;
-            margin-bottom: 6px;
+        a.button-link,
+        button {
+            background: #0d6efd;
+            color: white;
             border: none;
+            padding: 7px 10px;
+            text-decoration: none;
+            border-radius: 6px;
             cursor: pointer;
+            display: inline-block;
         }
 
-        .whatsapp-btn {
-            background: #25D366;
-            color: white;
-        }
-
-        .email-btn {
-            background: #2563eb;
-            color: white;
-        }
-
-        .whatsapp-btn:hover,
-        .email-btn:hover {
-            opacity: 0.9;
-        }
-
-        .flash-messages {
-            margin: 16px 0;
-        }
-
-        .flash {
-            padding: 12px 14px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .flash.success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .flash.error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        @media (max-width: 1024px) {
-            .card {
-                overflow-x: auto;
-            }
-
-            table {
-                min-width: 1450px;
-            }
+        a.button-link.logout {
+            background: #6c757d;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <a href="/" class="top-link">← Back to Recommendation Form</a>
-
-        <div class="card">
-            <div class="brand">Buildnex Core LLP</div>
+    <div class="top-bar">
+        <div>
             <h1>Admin Dashboard</h1>
-            <p>Track and manage incoming property leads captured through the Buildnex recommendation platform.</p>
+            <p>Captured leads from the property recommendation platform.</p>
+        </div>
 
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    <div class="flash-messages">
-                        {% for category, message in messages %}
-                            <div class="flash {{ category }}">{{ message }}</div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endwith %}
-
-            <form method="GET" class="filters">
-                <div>
-                    <label for="purpose">Purpose</label>
-                    <select name="purpose" id="purpose">
-                        <option value="">All</option>
-                        <option value="self" {% if purpose_filter == "self" %}selected{% endif %}>Self-use</option>
-                        <option value="investment" {% if purpose_filter == "investment" %}selected{% endif %}>Investment</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="priority">Lead Priority</label>
-                    <select name="priority" id="priority">
-                        <option value="">All</option>
-                        <option value="high" {% if priority_filter == "high" %}selected{% endif %}>High</option>
-                        <option value="medium" {% if priority_filter == "medium" %}selected{% endif %}>Medium</option>
-                        <option value="low" {% if priority_filter == "low" %}selected{% endif %}>Low</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="segment">Builder Segment</label>
-                    <select name="segment" id="segment">
-                        <option value="">All</option>
-                        <option value="premium" {% if segment_filter == "premium" %}selected{% endif %}>Premium</option>
-                        <option value="mid" {% if segment_filter == "mid" %}selected{% endif %}>Mid</option>
-                        <option value="value" {% if segment_filter == "value" %}selected{% endif %}>Value</option>
-                        <option value="luxury" {% if segment_filter == "luxury" %}selected{% endif %}>Luxury</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="score_category">Lead Score</label>
-                    <select name="score_category" id="score_category">
-                        <option value="">All</option>
-                        {% for category in allowed_score_categories %}
-                            <option value="{{ category }}" {% if score_category_filter == category %}selected{% endif %}>{{ category }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <label for="status">Lead Status</label>
-                    <select name="status" id="status">
-                        <option value="">All</option>
-                        {% for s in allowed_statuses %}
-                            <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <button type="submit">Apply Filters</button>
-                </div>
-            </form>
-
-            {% if leads %}
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Budget</th>
-                            <th>Purpose</th>
-                            <th>Top Area</th>
-                            <th>Priority</th>
-                            <th>Segment</th>
-                            <th>Paint</th>
-                            <th>Green</th>
-                            <th>Score</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lead in leads %}
-                            <tr>
-                                <td>{{ lead["name"] }}</td>
-                                <td>{{ lead["phone"] }}</td>
-                                <td>{{ lead["email"] or "-" }}</td>
-                                <td>₹{{ lead["budget_min"] }} - ₹{{ lead["budget_max"] }}</td>
-                                <td>{{ "Self-use" if lead["purpose"] == "self" else "Investment" }}</td>
-                                <td>{{ lead["top_area"]|title }}</td>
-                                <td><span class="badge">{{ lead["lead_priority"]|title }}</span></td>
-                                <td><span class="badge">{{ lead["builder_segment"]|title }}</span></td>
-                                <td>{{ lead["paint"]|title if lead["paint"] else "-" }}</td>
-                                <td>{{ lead["green"]|title if lead["green"] else "-" }}</td>
-
-                                <td>
-                                    {% if lead["lead_score_category"] == "HOT" %}
-                                        <span class="score-badge score-hot">🔥 HOT ({{ lead["lead_score"] }})</span>
-                                    {% elif lead["lead_score_category"] == "WARM" %}
-                                        <span class="score-badge score-warm">⚡ WARM ({{ lead["lead_score"] }})</span>
-                                    {% else %}
-                                        <span class="score-badge score-cold">❄️ COLD ({{ lead["lead_score"] }})</span>
-                                    {% endif %}
-                                </td>
-
-                                <td>
-                                    <form method="POST" action="/admin/leads/{{ lead['id'] }}/status" class="status-form">
-                                        <select name="status" onchange="this.form.submit()">
-                                            {% for s in allowed_statuses %}
-                                                <option value="{{ s }}" {% if lead["status"] == s %}selected{% endif %}>{{ s }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </form>
-                                </td>
-
-                                <td>
-                                    <form method="POST" action="/admin/leads/{{ lead['id'] }}/send-whatsapp" class="inline-form">
-                                        <button type="submit" class="action-btn whatsapp-btn">Send WhatsApp</button>
-                                    </form>
-
-                                    {% if lead["email"] %}
-                                    <a class="action-btn email-btn"
-                                       href="mailto:{{ lead['email'] }}">
-                                       Email
-                                    </a>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="empty">No leads matched the selected filters.</div>
-            {% endif %}
+        <div class="top-actions">
+            <a class="button-link" href="{{ url_for('today_followups') }}">Today's Follow-ups</a>
+            <a class="button-link logout" href="{{ url_for('logout') }}">Logout</a>
         </div>
     </div>
+
+    <div class="summary-bar">
+        <strong>Today Summary:</strong>
+        HOT: {{ hot_count }} |
+        WARM: {{ warm_count }} |
+        COLD: {{ cold_count }} |
+        Follow-ups Today: {{ today_followups_count }}
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="filters">
+        <form method="GET" action="{{ url_for('dashboard') }}">
+            <label>Purpose</label>
+            <select name="purpose">
+                <option value="">All</option>
+                <option value="self" {% if purpose_filter == 'self' %}selected{% endif %}>Self</option>
+                <option value="investment" {% if purpose_filter == 'investment' %}selected{% endif %}>Investment</option>
+            </select>
+
+            <label>Lead Priority</label>
+            <select name="priority">
+                <option value="">All</option>
+                <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+            </select>
+
+            <label>Builder Segment</label>
+            <select name="segment">
+                <option value="">All</option>
+                <option value="premium" {% if segment_filter == 'premium' %}selected{% endif %}>Premium</option>
+                <option value="mid" {% if segment_filter == 'mid' %}selected{% endif %}>Mid</option>
+                <option value="budget" {% if segment_filter == 'budget' %}selected{% endif %}>Budget</option>
+            </select>
+
+            <label>Status</label>
+            <select name="status">
+                <option value="">All</option>
+                {% for s in allowed_statuses %}
+                    <option value="{{ s }}" {% if status_filter == s %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Lead Score</label>
+            <select name="score_category">
+                <option value="">All</option>
+                {% for cat in allowed_score_categories %}
+                    <option value="{{ cat }}" {% if score_category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Apply Filters</button>
+        </form>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Budget</th>
+                <th>Purpose</th>
+                <th>Top Area</th>
+                <th>Priority</th>
+                <th>Score</th>
+                <th>Segment</th>
+                <th>Paint</th>
+                <th>Green</th>
+                <th>Status</th>
+                <th>Last Contact</th>
+                <th>Next Follow-up</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for lead in leads %}
+            <tr>
+                <td>{{ lead.name }}</td>
+                <td>{{ lead.phone }}</td>
+                <td>{{ lead.email }}</td>
+                <td>₹{{ lead.budget_min }} - ₹{{ lead.budget_max }}</td>
+                <td>{{ lead.purpose }}</td>
+                <td>{{ lead.top_area }}</td>
+                <td>{{ lead.lead_priority }}</td>
+                <td>
+                    {% if lead.lead_score_category == 'HOT' %}
+                        <span class="score-badge score-hot">HOT ({{ lead.lead_score }})</span>
+                    {% elif lead.lead_score_category == 'WARM' %}
+                        <span class="score-badge score-warm">WARM ({{ lead.lead_score }})</span>
+                    {% else %}
+                        <span class="score-badge score-cold">COLD ({{ lead.lead_score }})</span>
+                    {% endif %}
+                </td>
+                <td>{{ lead.builder_segment }}</td>
+                <td>{{ lead.paint }}</td>
+                <td>{{ lead.green }}</td>
+                <td><span class="status-badge">{{ lead.status }}</span></td>
+                <td>{{ lead.last_contact or '-' }}</td>
+                <td>{{ lead.next_followup or '-' }}</td>
+                <td style="white-space: pre-line;">{{ lead.notes or '-' }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <a class="button-link" href="{{ url_for('whatsapp_redirect', lead_id=lead.id) }}" target="_blank">WhatsApp</a>
+                        <a class="button-link" href="{{ url_for('followup_redirect', lead_id=lead.id) }}" target="_blank">Follow-up</a>
+                    </div>
+
+                    <form class="action-form" method="POST" action="{{ url_for('update_lead_status', lead_id=lead.id) }}">
+                        <select name="status" required>
+                            {% for s in allowed_statuses %}
+                                <option value="{{ s }}" {% if lead.status == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <input type="date" name="next_followup" value="{{ to_html_date(lead.next_followup) }}">
+                        <input type="text" name="notes" placeholder="Add new note">
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </body>
 </html>
